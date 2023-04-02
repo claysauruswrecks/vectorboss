@@ -4,3 +4,4 @@ ruff
 
 # main
 llama-index
+langchain
