@@ -18,10 +18,12 @@ prompt_helper = PromptHelper(
 )
 
 # Define LLM
-llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.7, model_name="text-davinci-003"))
+# llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.0, model_name="gpt-3.5-turbo"))
+llm_predictor = LLMPredictor(llm=OpenAI(temperature=0.0, model_name="gpt-4"))
 
+# NOTE: set a chunk size limit to < 1024 tokens
 service_context = ServiceContext.from_defaults(
-    llm_predictor=llm_predictor, prompt_helper=prompt_helper
+    llm_predictor=llm_predictor, chunk_size_limit=512
 )
 
 assert (
@@ -75,4 +77,10 @@ if docs is None:
 
 index = GPTSimpleVectorIndex.from_documents(docs, service_context=service_context)
 
-index.query("Explain each LlamaIndex class?")
+query = "How can I use the BaseGPTIndex class?"
+
+print(f"query: {query}")
+
+answer = index.query(query)
+
+print(f"answer: {answer}")
