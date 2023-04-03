@@ -1,0 +1,41 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:8-debian
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=shekelbot
+    ports:
+      - 127.0.0.1:3306:3306
+    privileged: true
+    entrypoint: /bin/bash -c "/bin/mount -t ramfs -o size=1024m ramdisk /var/lib/mysql &&
+      /entrypoint.sh --default-authentication-plugin=mysql_native_password
+      --local-infile"
+    restart: "unless-stopped"
+    security_opt:
+      - seccomp:unconfined
+
+  qdrant:
+    depends_on:
+      - mysql
+    image: qdrant/qdrant:latest
+    ports:
+    - 127.0.0.1:6333:6333
+    restart: "unless-stopped"
+    volumes:
+      - ./data/qdrant/storage:/qdrant/storage:rw
+      - ./data/qdrant/snapshots:/qdrant/snapshots:rw
+
+  vectorboss:
+    build:
+      context: ./
+      dockerfile: ./docker/base.Dockerfile
+    command: "bash --login"
+    depends_on:
+      - mysql
+      - qdrant
+    environment:
+      - OPENAI_API_KEY
+      - GITHUB_TOKEN
+    image: vectorboss:latest

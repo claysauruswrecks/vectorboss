@@ -1,7 +1,9 @@
 # dev
 black
-ruff
+pylama
+# ruff  # TODO: Config me
 
 # main
 llama-index
 langchain
+qdrant-client
