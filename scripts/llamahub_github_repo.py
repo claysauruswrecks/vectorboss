@@ -89,6 +89,36 @@ REPOS = {
             GithubRepositoryReader.FilterType.INCLUDE,
         ),
     ),
+    "qdrant/qdrant@f978dbbcb157f6ff243452b7c2d9356916fdaadc": dict(
+        filter_directories=(
+            [
+                "benches",
+                "config",
+                "docs",
+                "lib",
+                "openapi",
+                "src",
+                "tests",
+                "tools",
+            ],
+            GithubRepositoryReader.FilterType.INCLUDE,
+        ),
+        filter_file_extensions=(
+            [
+                ".bat",
+                ".js",
+                ".md",
+                # ".ipynb",
+                ".py",
+                ".rs",
+                ".rst",
+                ".sh",
+                ".toml",
+                "Dockerfile",
+            ],
+            GithubRepositoryReader.FilterType.INCLUDE,
+        ),
+    ),
 }
 
 # MODEL_NAME = "gpt-3.5-turbo"
@@ -102,7 +132,7 @@ EMBED_MODEL = OpenAIEmbedding(mode=OpenAIEmbeddingMode.SIMILARITY_MODE)
 
 LLM_PREDICTOR = LLMPredictor(
     llm=ChatOpenAI(
-        temperature=0.0, model_name=MODEL_NAME, max_tokens=MAX_TOKENS
+        temperature=0.1, model_name=MODEL_NAME, max_tokens=MAX_TOKENS
     )
 )
 
