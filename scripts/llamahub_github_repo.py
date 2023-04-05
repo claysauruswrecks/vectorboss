@@ -119,6 +119,16 @@ REPOS = {
             GithubRepositoryReader.FilterType.INCLUDE,
         ),
     ),
+    "qdrant/docs@777a161bab8da8d286ba33b26256026190e18247": dict(
+        filter_directories=(
+            ["cloud", "qdrant/v1.1.x"],
+            GithubRepositoryReader.FilterType.INCLUDE,
+        ),
+        filter_file_extensions=(
+            [".md", "README.md"],
+            GithubRepositoryReader.FilterType.INCLUDE,
+        ),
+    ),
 }
 
 # MODEL_NAME = "gpt-3.5-turbo"

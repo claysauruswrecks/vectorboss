@@ -21,11 +21,26 @@ services:
       - mysql
     image: qdrant/qdrant:latest
     ports:
-    - 127.0.0.1:6333:6333
+      - 127.0.0.1:6333:6333
     restart: "unless-stopped"
     volumes:
       - ./data/qdrant/storage:/qdrant/storage:rw
       - ./data/qdrant/snapshots:/qdrant/snapshots:rw
+
+  qdrant-ui:
+    build:
+      context: ./
+      dockerfile: ./docker/qdrant-ui.Dockerfile
+    command: npm start
+    depends_on:
+      - qdrant
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+    image: qdrant-ui:latest
+    ports:
+      - 127.0.0.1:3000:3000
+    restart: "unless-stopped"
 
   vectorboss:
     build:
@@ -35,7 +50,10 @@ services:
     depends_on:
       - mysql
       - qdrant
+      - qdrant-ui
     environment:
       - OPENAI_API_KEY
       - GITHUB_TOKEN
+      - QDRANT_HOST=qdrant
+      - QDRANT_GRPC_PORT=6334
     image: vectorboss:latest
