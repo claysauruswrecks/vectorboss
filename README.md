@@ -1,6 +1,6 @@
 # VectorBoss
 
-Operationalized Vector Stores/Data via Django, Celery, MySQL.
+Operationalized Vector Stores and Datasources via Django, Celery, MySQL.
 
 THE BADDEST DATA HUSTLER IN THE SOFTWARE ENGINEERING HOOD
 
