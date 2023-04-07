@@ -4,6 +4,9 @@ import argparse
 import logging
 import os
 import pickle
+import qdrant_client
+
+from llama_index import GPTQdrantIndex
 
 from langchain.chat_models import ChatOpenAI
 from llama_index import (
@@ -136,7 +139,7 @@ MODEL_NAME = "gpt-4"
 
 CHUNK_SIZE_LIMIT = 512
 CHUNK_OVERLAP = 200  # default
-MAX_TOKENS = None  # Set to None to use model's maximum
+MAX_TOKENS = None  # Set to None to use model's maximum, default
 
 EMBED_MODEL = OpenAIEmbedding(mode=OpenAIEmbeddingMode.SIMILARITY_MODE)
 
@@ -151,9 +154,25 @@ PICKLE_DOCS_DIR = os.path.join(
     "pickled_docs",
 )
 
-# Create the directory if it does not exist
+QDRANT_HOST = os.getenv("QDRANT_HOST", "qdrant")
+QDRANT_PORT = int(os.getenv("QDRANT_PORT", "6333"))
+
+QDRANT_INDEX_DOCS_DIR = os.path.join(
+    os.path.join(os.path.join(os.path.dirname(__file__), "../"), "data"),
+    "qdrant_index_docs",
+)
+
+QDRANT_INDEX_DOCS_FILE = os.path.join(
+    QDRANT_INDEX_DOCS_DIR, "qdrant_index_docs.json"
+)
+
+
+# Create the directories if they do not exist
 if not os.path.exists(PICKLE_DOCS_DIR):
     os.makedirs(PICKLE_DOCS_DIR)
+
+if not os.path.exists(QDRANT_INDEX_DOCS_DIR):
+    os.makedirs(QDRANT_INDEX_DOCS_DIR)
 
 
 def load_pickle(filename):
@@ -238,9 +257,29 @@ def main(args):
     for repo in g_docs.keys():
         docs.extend(g_docs[repo])
 
-    index = GPTSimpleVectorIndex.from_documents(
-        documents=docs, service_context=service_context
-    )
+    # index = GPTSimpleVectorIndex.from_documents(
+    #     documents=docs, service_context=service_context
+    # )
+    q_client = qdrant_client.QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+
+    # Check if QDRANT index already exists
+    if os.path.exists(QDRANT_INDEX_DOCS_FILE):
+        logging.debug(f"QDRANT index already exists: {QDRANT_INDEX_DOCS_FILE}")
+        index = GPTQdrantIndex.load_from_disk(
+            QDRANT_INDEX_DOCS_FILE, client=q_client
+        )
+    else:
+        index = GPTQdrantIndex.from_documents(
+            documents=docs,
+            client=q_client,
+            service_context=service_context,
+            collection_name="docs",
+        )
+
+    # Check if QDRANT index already exists
+    if not os.path.exists(QDRANT_INDEX_DOCS_FILE):
+        logging.debug(f"QDRANT index already exists: {QDRANT_INDEX_DOCS_FILE}")
+        index.save_to_disk(QDRANT_INDEX_DOCS_FILE)
 
     # Ask for CLI input in a loop
     while True:
